@@ -1020,7 +1020,17 @@ function restoreMonth(k){
 const PALETTE=['#0891b2','#be185d','#4d7c0f','#b45309','#7c3aed','#0e7490','#9333ea','#dc2626','#16a34a','#2563eb','#c026d3','#ea580c'];
 const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+// Candado simple: pide la contraseña cada vez que se intenta cargar un archivo nuevo.
+// No es seguridad real (el código es público), es solo un filtro para evitar cargas accidentales o no autorizadas.
+function checkUploadPin(){
+  const pin = prompt('Contraseña para actualizar datos:');
+  if(pin === null) return false; // canceló
+  if(pin !== 'cesarG83'){ alert('Contraseña incorrecta.'); return false; }
+  return true;
+}
+
 async function handleXlsx(file){
+  if(!checkUploadPin()) return;
   const status=document.getElementById('upStatus');
   status.textContent=`Leyendo ${file.name}…`;
   try{
@@ -1113,6 +1123,7 @@ async function handleXlsx(file){
 
 // ── RESTABLECER ───────────────────────────────────────────────────────────
 function resetAll(){
+  if(!checkUploadPin()) return;
   const añadidos=Object.keys(EXTRA_MONTHS).length, ocultos=HIDDEN.length;
   if(!añadidos && !ocultos){alert('El dashboard ya está en su estado original.');return;}
   if(!confirm(`Esto borra de ESTE navegador:\n · ${añadidos} mes(es) que agregaste\n · ${ocultos} mes(es) oculto(s)\n\nEl dashboard vuelve a como venía de origen. Los archivos de Excel no se tocan.\n\n¿Continuar?`)) return;
@@ -1156,6 +1167,7 @@ function exportHTML(){
   st.textContent=`✓ ${fname} descargado — ese archivo ya lleva los ${keys.length} meses integrados.`;
   setTimeout(()=>{st.textContent=''},9000);
 }
+
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{

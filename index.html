@@ -996,7 +996,9 @@ function buildDynamicUI(){
     `<span class="chip" style="border-color:${MONTHS[k].color};color:${MONTHS[k].color}">${MONTHS[k].label}<b onclick="removeMonth('${k}')" title="Quitar ${MONTHS[k].label} del dashboard">✕</b></span>`).join(' ');
   const hid=HIDDEN.filter(k=>ALL_MONTHS[k]).sort((a,b)=>ALL_MONTHS[a].ym-ALL_MONTHS[b].ym).map(k=>
     `<span class="chip off">${ALL_MONTHS[k].label}<b onclick="restoreMonth('${k}')" title="Volver a mostrar ${ALL_MONTHS[k].label}">↩</b></span>`).join(' ');
-  document.getElementById('extraChips').innerHTML=
+  // extraChips vive dentro de la zona de carga (#upZone), que no existe en la copia exportada final
+  const extraChipsEl=document.getElementById('extraChips');
+  if(extraChipsEl) extraChipsEl.innerHTML=
     '<span style="color:var(--sub);font-size:.72rem">Meses:</span> '+act+
     (hid?` <span style="color:var(--sub);font-size:.72rem">· ocultos:</span> ${hid}`:'');
 }
@@ -1097,9 +1099,12 @@ async function handleXlsx(file){
 }
 
 // Drag & drop + input
+// (en la copia exportada final, #upZone se elimina a propósito; por eso se valida antes de usarla,
+// para que el resto del script — y las gráficas — sigan construyéndose con normalidad)
 (function(){
   const zone=document.getElementById('upZone');
   const inp=document.getElementById('fileInp');
+  if(!zone || !inp) return;
   ['dragenter','dragover'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>zone.addEventListener(ev,e=>{e.preventDefault();zone.classList.remove('drag');}));
   zone.addEventListener('drop',e=>{[...e.dataTransfer.files].forEach(f=>{if(/\.(xlsx|xlsm)$/i.test(f.name)) handleXlsx(f);});});
